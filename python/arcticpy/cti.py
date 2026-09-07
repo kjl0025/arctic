@@ -85,6 +85,7 @@ def add_cti(
     serial_prune_frequency=20,
     # Combined
     allow_negative_pixels=1,
+    trap_density_map=None,
     # Pixel bounce
     pixel_bounce_list : Optional[List[PixelBounce]] = None,
     # Output
@@ -295,6 +296,7 @@ def add_cti(
         # Combined
         # ========
         allow_negative_pixels,
+        trap_density_map,
         # ========
         # Output
         # ========
@@ -381,6 +383,7 @@ def remove_cti(
     serial_prune_frequency=20,
     # Combined
     allow_negative_pixels=1,
+    trap_density_map=None,
     # Pixel bounce
     pixel_bounce_list : Optional[List[PixelBounce]] = None,
     # Optional: read noise de-amplification
@@ -502,6 +505,7 @@ def remove_cti(
             serial_prune_frequency=serial_prune_frequency,
             # Combined
             allow_negative_pixels=allow_negative_pixels,
+            trap_density_map=trap_density_map,
             # Pixel bounce
             pixel_bounce_list=pixel_bounce_list,
             # Output

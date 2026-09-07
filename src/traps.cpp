@@ -9,6 +9,7 @@
 
 #include <valarray>
 #include <limits>
+#include <algorithm>
 
 #include "util.hpp"
 

@@ -70,4 +70,4 @@ void add_cti(
     // ========
     int allow_negative_pixels,
     // Output
-    int verbosity, int iteration);
+    int verbosity, int iteration, double* raw_trap_density_map);

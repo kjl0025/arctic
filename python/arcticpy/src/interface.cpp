@@ -105,7 +105,8 @@ void add_cti(
     // ========
     int allow_negative_pixels, 
     // Output
-    int verbosity, int iteration) {
+    int verbosity, int iteration,
+    double** raw_trap_density_map) {
 
     set_verbosity(verbosity);
 
@@ -120,6 +121,20 @@ void add_cti(
         }
     }
 
+    // 1. Convert the raw double* trap map to a valarray grid if it exists:
+    std::valarray<std::valarray<double>> trap_map_valarray;
+    std::valarray<std::valarray<double>>* trap_map_ptr = nullptr;
+
+    if (raw_trap_density_map != nullptr) {
+        std::valarray<std::valarray<double> > trap_map_valarray(
+        std::valarray<double>(0.0, n_columns), n_rows);
+        for (int i_row = 0; i_row < n_rows; i_row++) {
+            for (int i_col = 0; i_col < n_columns; i_col++) {
+                trap_map_valarray[i_row][i_col] = raw_trap_density_map[i_row][i_col];
+            }
+        }
+        trap_map_ptr = &trap_map_valarray;
+    }
     // ========
     // Parallel
     // ========
@@ -326,7 +341,7 @@ void add_cti(
             // Combined
             allow_negative_pixels, 
             // Output
-            verbosity, iteration);
+            verbosity, iteration, trap_map_ptr);
     }
     // No serial, parallel only
     else if (n_traps_serial == 0) {
@@ -345,7 +360,7 @@ void add_cti(
             // Combined
             allow_negative_pixels, 
             // Output
-            verbosity, iteration);
+            verbosity, iteration, trap_map_ptr);
     }
     // Parallel and serial
     else {
@@ -368,7 +383,7 @@ void add_cti(
             // Combined
             allow_negative_pixels, 
             // Output
-            verbosity, iteration);
+            verbosity, iteration, trap_map_ptr);
     }
 
     // Delete serial/parallel ROE if previously allocated

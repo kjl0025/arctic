@@ -1,0 +1,10 @@
+Metadata-Version: 2.4
+Name: arcticpy
+Version: 2.5
+Summary: This is the python module for the arCTIc code
+Author-email: Richard Massey <r.j.massey@durham.ac.uk>
+Requires-Python: >=3.8
+Requires-Dist: numpy~=1.21
+Provides-Extra: pytest
+Requires-Dist: coverage; extra == "pytest"
+Requires-Dist: pytest; extra == "pytest"

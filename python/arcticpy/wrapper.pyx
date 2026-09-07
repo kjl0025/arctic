@@ -109,7 +109,8 @@ cdef extern from "interface.hpp":
         int allow_negative_pixels,
         # Output
         int verbosity,
-        int iteration
+        int iteration,
+        double* trap_density_map
     )
 
 
@@ -222,6 +223,7 @@ def cy_add_cti(
     # Output
     int verbosity,
     int iteration,
+    np.ndarray[np.double_t, ndim=2] trap_density_map
 ):
     """
     Cython wrapper for arctic's add_cti() in src/cti.cpp.
@@ -231,6 +233,7 @@ def cy_add_cti(
     in interface.cpp.
     """
     image = check_contiguous(image)
+    trap_density_map = check_contiguous(trap_density_map)
 
     add_cti(
         &image[0, 0],
@@ -320,7 +323,8 @@ def cy_add_cti(
         allow_negative_pixels,
         # Output
         verbosity,
-        iteration
+        iteration,
+        &trap_density_map[0, 0]
     )
 
     return image

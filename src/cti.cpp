@@ -597,12 +597,11 @@ std::valarray<std::valarray<double> > add_cti(
     int serial_express, int serial_offset, 
     int serial_window_start, int serial_window_stop, 
     int serial_time_start, int serial_time_stop,
-    double serial_prune_n_electrons, int serial_prune_frequency,
-    std::valarray<std::valarray<double>>* trap_density_map, 
+    double serial_prune_n_electrons, int serial_prune_frequency, 
     // Combined
     int allow_negative_pixels, 
     // Output
-    int verbosity, int iteration) {
+    int verbosity, int iteration, std::valarray<std::valarray<double>>* trap_density_map) {
     
  
     // Print unless being called by remove_cti()
@@ -635,6 +634,7 @@ std::valarray<std::valarray<double> > add_cti(
 
         print_v(1, "Serial: ");
         image = transpose(image);
+        trap_density_map = nullptr;
         image = clock_charge_in_one_direction(
             image, serial_roe, serial_ccd, serial_traps_ic, serial_traps_sc,
             serial_traps_ic_co, serial_traps_sc_co, 
@@ -697,9 +697,9 @@ std::valarray<std::valarray<double> > remove_cti(
     int serial_window_start, int serial_window_stop,
     int serial_time_start, int serial_time_stop,
     double serial_prune_n_electrons, int serial_prune_frequency,
-    std::valarray<std::valarray<double>>* trap_density_map, 
     // Combined
-    int allow_negative_pixels) {
+    int allow_negative_pixels, 
+    std::valarray<std::valarray<double>>* trap_density_map) { 
 
     print_version();
 

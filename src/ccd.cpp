@@ -1,4 +1,4 @@
-
+#include <cstdlib>
 #include "ccd.hpp"
 
 #include <math.h>
