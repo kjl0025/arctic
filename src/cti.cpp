@@ -73,7 +73,8 @@ std::valarray<std::valarray<double> > clock_charge_in_one_direction(
     int column_start, int column_stop, 
     int time_start, int time_stop, 
     double prune_n_electrons, int prune_frequency,
-    int allow_negative_pixels, int print_inputs) {
+    int allow_negative_pixels, int print_inputs,
+    std::valarray<std::valarray<double> >* trap_density_map) {
     
     // Initialise the output image as a copy of the input image
     std::valarray<std::valarray<double> > image = image_in;
@@ -312,7 +313,7 @@ std::valarray<std::valarray<double> > clock_charge_in_one_direction(
     // Loop over:
     //   Columns > Express passes > Rows > Clock-sequence steps > Pixel phases
     #pragma omp parallel for private(column_index, row_index, row_read, row_write, n_free_electrons, \
-				     n_electrons_released_and_captured, express_multiplier, roe_step_phase) \
+				     n_electrons_released_and_captured, express_multiplier, roe_step_phase, trap_density_map) \
                              firstprivate(trap_manager_manager)
     for (unsigned int i_column = 0; i_column < n_active_columns; i_column++) {
         column_index = column_start + i_column;
@@ -342,6 +343,20 @@ std::valarray<std::valarray<double> > clock_charge_in_one_direction(
                 if (express_multiplier == 0) continue;
 
                 print_v(2, "express_multiplier  %g \n", express_multiplier);
+                
+                // =========================================================================
+                // MODIFICATION: Fetch pixel-specific trap density multiplier
+                // (Set to 1.0 if using uniform traps, or map value if trap_density_map is passed) XXX
+                // =========================================================================
+                double trap_density_scale;
+                if (trap_density_map != nullptr) {
+                    trap_density_scale = (*trap_density_map)[row_index][column_index];
+                } else {
+                    trap_density_scale = 1.0;
+                }
+
+                // If this pixel has 0 traps, skip processing trap dynamics for this pixel
+                if (trap_density_scale <= 0.0) continue;
 
                 // Each step in the clock sequence
                 for (unsigned int i_step = 0; i_step < roe->n_steps; i_step++) {
@@ -406,6 +421,10 @@ std::valarray<std::valarray<double> > clock_charge_in_one_direction(
 
                         print_v(2, "n_free_electrons  %g \n", n_free_electrons);
 
+                        // =========================================================================
+                        // MODIFICATION: Apply local trap density scaling factor XXX
+                        // =========================================================================
+                        n_electrons_released_and_captured *= trap_density_scale;
 
                         // Return the charge to the relevant pixel(s)
                         for (int i = 0; i < roe_step_phase->n_release_pixels; i++) {
@@ -579,6 +598,7 @@ std::valarray<std::valarray<double> > add_cti(
     int serial_window_start, int serial_window_stop, 
     int serial_time_start, int serial_time_stop,
     double serial_prune_n_electrons, int serial_prune_frequency,
+    std::valarray<std::valarray<double>>* trap_density_map, 
     // Combined
     int allow_negative_pixels, 
     // Output
@@ -606,7 +626,7 @@ std::valarray<std::valarray<double> > add_cti(
             serial_window_start, serial_window_stop, 
             parallel_time_start, parallel_time_stop,
             parallel_prune_n_electrons, parallel_prune_frequency,
-            allow_negative_pixels, print_inputs);
+            allow_negative_pixels, print_inputs, trap_density_map);
     }
 
     // Serial clocking along rows, transfer charge towards column 0
@@ -623,7 +643,7 @@ std::valarray<std::valarray<double> > add_cti(
             parallel_window_start, parallel_window_stop, 
             serial_time_start, serial_time_stop,
             serial_prune_n_electrons, serial_prune_frequency,
-            allow_negative_pixels, print_inputs);
+            allow_negative_pixels, print_inputs, trap_density_map);
 
         image = transpose(image);
     }
@@ -677,6 +697,7 @@ std::valarray<std::valarray<double> > remove_cti(
     int serial_window_start, int serial_window_stop,
     int serial_time_start, int serial_time_stop,
     double serial_prune_n_electrons, int serial_prune_frequency,
+    std::valarray<std::valarray<double>>* trap_density_map, 
     // Combined
     int allow_negative_pixels) {
 
@@ -705,7 +726,7 @@ std::valarray<std::valarray<double> > remove_cti(
             serial_offset, serial_window_start, serial_window_stop, 
             serial_time_start, serial_time_stop, 
             serial_prune_n_electrons, serial_prune_frequency,
-            allow_negative_pixels, 0, iteration);
+            allow_negative_pixels, 0, iteration, trap_density_map);
 
         // Improve the estimate of the image with CTI trails removed
         image_remove_cti += image_in - image_add_cti;

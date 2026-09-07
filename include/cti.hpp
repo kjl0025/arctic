@@ -17,7 +17,9 @@ std::valarray<std::valarray<double> > clock_charge_in_one_direction(
     int column_start = 0, int column_stop = -1, 
     int time_start = 0, int time_stop = -1,
     double prune_n_electrons = 1e-10, int prune_frequency = 20, 
-    int allow_negative_pixels = 1, int print_inputs = -1);
+    int allow_negative_pixels = 1, int print_inputs = -1,
+    // modification to allow per-pixel trap density map XXX
+    std::valarray<std::valarray<double> >* trap_density_map = nullptr);
 
 std::valarray<std::valarray<double> > add_cti(
     std::valarray<std::valarray<double> >& image_in,
@@ -43,7 +45,9 @@ std::valarray<std::valarray<double> > add_cti(
     double serial_prune_n_electrons = 1e-10, int serial_prune_frequency = 20, 
     // Combined
     int allow_negative_pixels = 1,
-    int verbosity = 0, int iteration = 0);
+    int verbosity = 0, int iteration = 0,
+    // modification to allow per-pixel trap density map XXX
+    std::valarray<std::valarray<double> >* trap_density_map = nullptr);
 
 std::valarray<std::valarray<double> > remove_cti(
     std::valarray<std::valarray<double> >& image_in, int n_iterations,
@@ -68,6 +72,8 @@ std::valarray<std::valarray<double> > remove_cti(
     int serial_time_start = 0, int serial_time_stop = -1,
     double serial_prune_n_electrons = 1e-10, int serial_prune_frequency = 20, 
     // Combined
-    int allow_negative_pixels = 1);
+    int allow_negative_pixels = 1,
+    // modification to allow per-pixel trap density map XXX
+    std::valarray<std::valarray<double> >* trap_density_map = nullptr);
 
 #endif  // ARCTIC_CTI_HPP

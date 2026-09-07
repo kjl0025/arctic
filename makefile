@@ -65,13 +65,13 @@ DIR_TEST := $(DIR_ROOT)/test
 #DIR_GSL ?= /cosma/local/gsl/2.8
 #DIR_OMP ?= /cosma/local/openmpi/gnu_11.1.0/4.1.4
 # Use the following on a standalone machine
-DIR_HOMEBREW := /usr/local # brew install llvm libomp gsl
-DIR_MACPORTS := /opt/local # sudo port install libomp gsl
-#DIR_GSL ?= $(DIR_HOMEBREW)
-#DIR_OMP ?= $(DIR_HOMEBREW)
+DIR_HOMEBREW := /usr/local# brew install llvm libomp gsl
+DIR_MACPORTS := /opt/local# sudo port install libomp gsl
+DIR_GSL ?= $(DIR_HOMEBREW)
+DIR_OMP ?= $(DIR_HOMEBREW)/opt/libomp
 #DIR_OMP ?= $(DIR_MACPORTS)/libomp
-DIR_OMP ?= $(DIR_MACPORTS)
-DIR_GSL ?= $(DIR_MACPORTS)
+#DIR_OMP ?= $(DIR_MACPORTS)
+#DIR_GSL ?= $(DIR_MACPORTS)
 # Use the following if the above doesn't work - fall back to self-installing GSL
 #DIR_GSL ?= $(DIR_ROOT)/gsl
 DIR_WRAPPER := $(DIR_ROOT)/python/arcticpy
@@ -99,9 +99,9 @@ LIBARCTIC := -L $(DIR_ROOT) -Wl,-rpath,$(DIR_ROOT) -l$(TARGET)
 # Add multithreading to reduce runtime (requires OpenMP to have been installed)
 CXXFLAGS += -Xpreprocessor -fopenmp
 # Use the following on a homebrew mac
-#LIBS += -L $(DIR_OMP)/lib -lomp
+LIBS += -L $(DIR_OMP)/lib -lomp
 # Use the following on linux, cosma, or a mac with macports
-LIBS += -L $(DIR_OMP)/lib -lgomp
+#LIBS += -L $(DIR_OMP)/lib -lgomp
 
 
 # ========
