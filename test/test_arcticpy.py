@@ -930,14 +930,14 @@ def run_demo():
         parallel_ccd=ccd,
         parallel_traps=traps,
         parallel_express=express,
-        parallel_offset=offset,
+        #parallel_offset=offset,
         parallel_window_start=start,
         parallel_window_stop=stop,
         serial_roe=roe,
         serial_ccd=ccd,
         serial_traps=traps,
         serial_express=express,
-        serial_offset=offset,
+        #serial_offset=offset,
         serial_window_start=start,
         serial_window_stop=stop,
         verbosity=1,
@@ -954,14 +954,14 @@ def run_demo():
         parallel_ccd=ccd,
         parallel_traps=traps,
         parallel_express=express,
-        parallel_offset=offset,
+        #parallel_offset=offset,
         parallel_window_start=start,
         parallel_window_stop=stop,
         serial_roe=roe,
         serial_ccd=ccd,
         serial_traps=traps,
         serial_express=express,
-        serial_offset=offset,
+        #serial_offset=offset,
         serial_window_start=start,
         serial_window_stop=stop,
         verbosity=1,
@@ -970,6 +970,100 @@ def run_demo():
     print("\n# Image with CTI removed:")
     cti.print_array_2D(image_removed_cti)
 
+
+def run_map():
+    # Add CTI to a test image, then remove it using trap_density_map
+    image_pre_cti = np.array(
+        [
+            [0.0, 0.0, 0.0, 0.0],
+            [200.0, 0.0, 0.0, 0.0],
+            [0.0, 200.0, 0.0, 0.0],
+            [0.0, 0.0, 200.0, 0.0],
+            [0.0, 0.0, 0.0, 0.0],
+            [0.0, 0.0, 0.0, 0.0],
+        ]
+    )
+    trap_density_map = np.array(
+        [
+            [0.0, 0.0, 0.0, 0.0],
+            [0.0, 0.0, 0.0, 0.0],
+            [1.0, 0.0, 0.0, 0.0],
+            [0.0, 0.0, 0.0, 0.0],
+            [0.0, 0.0, 0.0, 0.0],
+            [0.0, 0.0, 0.0, 0.0],
+        ]
+    )
+
+    roe = cti.ROE(
+        dwell_times=[1.0],
+        empty_traps_between_columns=True,
+        empty_traps_for_first_transfers=False,
+        force_release_away_from_readout=True,
+        use_integer_express_matrix=False,
+    )
+    ccd = cti.CCD(
+        phases=[
+            cti.CCDPhase(full_well_depth=1e3, well_notch_depth=0.0, well_fill_power=1.0)
+        ],
+        fraction_of_traps_per_phase=[1.0],
+    )
+    traps = [cti.TrapInstantCapture(density=10.0, release_timescale=-1.0 / np.log(0.5))]
+    express = 0
+    offset = 0
+    start = 0
+    stop = -1
+
+    print("\n# Test image:")
+    cti.print_array_2D(image_pre_cti)
+
+    print("\n# Add CTI")
+    image_post_cti = cti.add_cti(
+        image=image_pre_cti,
+        parallel_roe=roe,
+        parallel_ccd=ccd,
+        parallel_traps=traps,
+        parallel_express=express,
+        #parallel_offset=offset,
+        parallel_window_start=start,
+        parallel_window_stop=stop,
+        # serial_roe=roe,
+        # serial_ccd=ccd,
+        # serial_traps=traps,
+        # serial_express=express,
+        # #serial_offset=offset,
+        # serial_window_start=start,
+        # serial_window_stop=stop,
+        verbosity=1,
+        trap_density_map=trap_density_map
+    )
+
+    print("\n# Image with CTI added:")
+    cti.print_array_2D(image_post_cti)
+
+    print("\n# Remove CTI")
+    image_removed_cti = cti.remove_cti(
+        image=image_post_cti,
+        n_iterations=4,
+        parallel_roe=roe,
+        parallel_ccd=ccd,
+        parallel_traps=traps,
+        parallel_express=express,
+        #parallel_offset=offset,
+        parallel_window_start=start,
+        parallel_window_stop=stop,
+        # serial_roe=roe,
+        # serial_ccd=ccd,
+        # serial_traps=traps,
+        # serial_express=express,
+        # #serial_offset=offset,
+        # serial_window_start=start,
+        # serial_window_stop=stop,
+        verbosity=1,
+        trap_density_map=trap_density_map
+    )
+
+    print("\n# Image with CTI removed:")
+    cti.print_array_2D(image_removed_cti)
 
 def run_benchmark():
     # Download the test image
@@ -1030,6 +1124,8 @@ def print_help():
         "    then removes CTI from a test image. \n"
         "-b, --benchmark \n"
         "    Execute the run_benchmark() function in this file, e.g. for profiling. \n"
+        "-m, --map \n"
+        "    Execute the run_map() function in this file, e.g. for using trap density maps. \n"
         "\n"
         "See README.md for more information.  https://github.com/jkeger/arctic \n\n"
     )
@@ -1043,6 +1139,9 @@ if __name__ == "__main__":
         elif sys.argv[1] in ["-b", "--benchmark"]:
             print("# Running benchmark code")
             run_benchmark()
+        elif sys.argv[1] in ["-m", "--map"]:
+            print("# Running trap density map code")
+            run_map()
         else:
             print_help()
     except IndexError:

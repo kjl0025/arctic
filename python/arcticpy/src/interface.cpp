@@ -106,7 +106,7 @@ void add_cti(
     int allow_negative_pixels, 
     // Output
     int verbosity, int iteration,
-    double** raw_trap_density_map) {
+    double* raw_trap_density_map) {
 
     set_verbosity(verbosity);
 
@@ -121,16 +121,18 @@ void add_cti(
         }
     }
 
-    // 1. Convert the raw double* trap map to a valarray grid if it exists:
+    // 1. Convert the raw double* trap map (flattened row-major) to a valarray
+    //    grid if it exists. The Cython wrapper passes a contiguous
+    //    double* (flattened) buffer, so index as [row * n_columns + col].
     std::valarray<std::valarray<double>> trap_map_valarray;
     std::valarray<std::valarray<double>>* trap_map_ptr = nullptr;
 
     if (raw_trap_density_map != nullptr) {
-        std::valarray<std::valarray<double> > trap_map_valarray(
-        std::valarray<double>(0.0, n_columns), n_rows);
+        trap_map_valarray = std::valarray<std::valarray<double> >(
+            std::valarray<double>(0.0, n_columns), n_rows);
         for (int i_row = 0; i_row < n_rows; i_row++) {
             for (int i_col = 0; i_col < n_columns; i_col++) {
-                trap_map_valarray[i_row][i_col] = raw_trap_density_map[i_row][i_col];
+                trap_map_valarray[i_row][i_col] = raw_trap_density_map[i_row * n_columns + i_col];
             }
         }
         trap_map_ptr = &trap_map_valarray;

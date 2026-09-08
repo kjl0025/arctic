@@ -223,7 +223,7 @@ def cy_add_cti(
     # Output
     int verbosity,
     int iteration,
-    np.ndarray[np.double_t, ndim=2] trap_density_map
+    np.ndarray[np.double_t, ndim=2] trap_density_map=None
 ):
     """
     Cython wrapper for arctic's add_cti() in src/cti.cpp.
@@ -233,7 +233,14 @@ def cy_add_cti(
     in interface.cpp.
     """
     image = check_contiguous(image)
-    trap_density_map = check_contiguous(trap_density_map)
+    cdef double* c_trap_ptr = NULL
+    if trap_density_map is None:
+        c_trap_ptr = NULL
+    else:
+        trap_density_map = check_contiguous(trap_density_map)
+        if trap_density_map.shape[0] != image.shape[0] or trap_density_map.shape[1] != image.shape[1]:
+            raise ValueError("trap_density_map must have shape (n_rows, n_columns)")
+        c_trap_ptr = &trap_density_map[0, 0]
 
     add_cti(
         &image[0, 0],
@@ -324,7 +331,7 @@ def cy_add_cti(
         # Output
         verbosity,
         iteration,
-        &trap_density_map[0, 0]
+        c_trap_ptr
     )
 
     return image

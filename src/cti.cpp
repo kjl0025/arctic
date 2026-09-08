@@ -312,9 +312,9 @@ std::valarray<std::valarray<double> > clock_charge_in_one_direction(
     //print_array_2D((int)roe->store_trap_states_matrix, n_active_rows);
     // Loop over:
     //   Columns > Express passes > Rows > Clock-sequence steps > Pixel phases
-    #pragma omp parallel for private(column_index, row_index, row_read, row_write, n_free_electrons, \
-				     n_electrons_released_and_captured, express_multiplier, roe_step_phase, trap_density_map) \
-                             firstprivate(trap_manager_manager)
+        #pragma omp parallel for private(column_index, row_index, row_read, row_write, n_free_electrons, \
+                 n_electrons_released_and_captured, express_multiplier, roe_step_phase) \
+                     firstprivate(trap_manager_manager)
     for (unsigned int i_column = 0; i_column < n_active_columns; i_column++) {
         column_index = column_start + i_column;
 
@@ -351,12 +351,13 @@ std::valarray<std::valarray<double> > clock_charge_in_one_direction(
                 double trap_density_scale;
                 if (trap_density_map != nullptr) {
                     trap_density_scale = (*trap_density_map)[row_index][column_index];
+                    print_v(2, "trap_density_scale  %g \n", trap_density_scale);
                 } else {
                     trap_density_scale = 1.0;
                 }
 
                 // If this pixel has 0 traps, skip processing trap dynamics for this pixel
-                if (trap_density_scale <= 0.0) continue;
+                //if (trap_density_scale <= 0.0) continue;
 
                 // Each step in the clock sequence
                 for (unsigned int i_step = 0; i_step < roe->n_steps; i_step++) {

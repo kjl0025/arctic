@@ -85,13 +85,13 @@ def add_cti(
     serial_prune_frequency=20,
     # Combined
     allow_negative_pixels=1,
-    trap_density_map=None,
     # Pixel bounce
     pixel_bounce_list : Optional[List[PixelBounce]] = None,
     # Output
     vv_test=False,
     verbosity=1,
     iteration=0,
+    trap_density_map=None,
 ):
     """
     Wrapper for arctic's add_cti() in src/cti.cpp, see its documentation.
@@ -296,12 +296,12 @@ def add_cti(
         # Combined
         # ========
         allow_negative_pixels,
-        trap_density_map,
         # ========
         # Output
         # ========
         verbosity,
         iteration,
+        trap_density_map,
     )
 
     # ================
@@ -383,7 +383,6 @@ def remove_cti(
     serial_prune_frequency=20,
     # Combined
     allow_negative_pixels=1,
-    trap_density_map=None,
     # Pixel bounce
     pixel_bounce_list : Optional[List[PixelBounce]] = None,
     # Optional: read noise de-amplification
@@ -392,6 +391,7 @@ def remove_cti(
     vv_test=False,
     # Output
     verbosity=1,
+    trap_density_map=None,
 ):
     """
     Wrapper for arctic's remove_cti() in src/cti.cpp, see its documentation.
@@ -505,13 +505,13 @@ def remove_cti(
             serial_prune_frequency=serial_prune_frequency,
             # Combined
             allow_negative_pixels=allow_negative_pixels,
-            trap_density_map=trap_density_map,
             # Pixel bounce
             pixel_bounce_list=pixel_bounce_list,
             # Output
             verbosity=verbosity,
             vv_test=False,
-            iteration=iteration
+            iteration=iteration,
+            trap_density_map=trap_density_map,
         )
 
         # Improve the estimate of the image with CTI trails removed
