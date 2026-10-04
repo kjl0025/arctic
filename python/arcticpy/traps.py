@@ -2,9 +2,13 @@ import numpy as np
 
 
 class AbstractTrap:
-    def __init__(self, density=1.0, release_timescale=1.0):
+    def __init__(
+        self, density=1.0, release_timescale=1.0, trap_row=None, trap_col=None
+    ):
         self.density = density
         self.release_timescale = release_timescale
+        self.trap_row = trap_row
+        self.trap_col = trap_col
 
     @property
     def delta_ellipticity(self):
@@ -18,8 +22,10 @@ class TrapInstantCapture(AbstractTrap):
         release_timescale=1.0,
         fractional_volume_none_exposed=0.0,
         fractional_volume_full_exposed=0.0,
+        trap_row=None,
+        trap_col=None,
     ):
-        super().__init__(density, release_timescale)
+        super().__init__(density, release_timescale, trap_row, trap_col)
 
         self.fractional_volume_none_exposed = fractional_volume_none_exposed
         self.fractional_volume_full_exposed = fractional_volume_full_exposed
@@ -61,20 +67,37 @@ class TrapInstantCapture(AbstractTrap):
         poisson_density_per_pixel = poisson_density_pixels / total_pixels
 
         return TrapInstantCapture(
-            density=poisson_density_per_pixel, release_timescale=self.release_timescale
+            density=poisson_density_per_pixel,
+            release_timescale=self.release_timescale,
+            trap_row=self.trap_row,
+            trap_col=self.trap_col,
         )
 
 
 class TrapSlowCapture(AbstractTrap):
-    def __init__(self, density=1.0, release_timescale=1.0, capture_timescale=0.0):
-        super().__init__(density, release_timescale)
+    def __init__(
+        self,
+        density=1.0,
+        release_timescale=1.0,
+        capture_timescale=0.0,
+        trap_row=None,
+        trap_col=None,
+    ):
+        super().__init__(density, release_timescale, trap_row, trap_col)
 
         self.capture_timescale = capture_timescale
 
 
 class TrapInstantCaptureContinuum(AbstractTrap):
-    def __init__(self, density=1.0, release_timescale=1.0, release_timescale_sigma=0.0):
-        super().__init__(density, release_timescale)
+    def __init__(
+        self,
+        density=1.0,
+        release_timescale=1.0,
+        release_timescale_sigma=0.0,
+        trap_row=None,
+        trap_col=None,
+    ):
+        super().__init__(density, release_timescale, trap_row, trap_col)
 
         self.release_timescale_sigma = release_timescale_sigma
 
@@ -86,8 +109,12 @@ class TrapSlowCaptureContinuum(TrapSlowCapture):
         release_timescale=1.0,
         release_timescale_sigma=0.0,
         capture_timescale=0.0,
+        trap_row=None,
+        trap_col=None,
     ):
-        super().__init__(density, release_timescale)
+        super().__init__(
+            density, release_timescale, trap_row=trap_row, trap_col=trap_col
+        )
 
         self.release_timescale_sigma = release_timescale_sigma
         self.capture_timescale = capture_timescale

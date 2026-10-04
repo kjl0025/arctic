@@ -48,7 +48,11 @@ class TrapManagerBase {
     virtual double n_trapped_electrons_from_watermarks(
         std::valarray<double> wmk_volumes, std::valarray<double> wmk_fills);
     int watermark_index_above_cloud(double cloud_fractional_volume);
-    virtual double n_electrons_released_from_wmk_above_cloud(int i_wmk);
+    void restore_other_trap_fills(
+        int trap_number, const std::valarray<double>& old_volumes,
+        const std::valarray<double>& old_fills, int old_first, int old_n);
+    virtual double n_electrons_released_from_wmk_above_cloud(
+        int i_wmk, int trap_number = -1);
 };
 
 class TrapManagerInstantCapture : public TrapManagerBase {
@@ -67,14 +71,14 @@ class TrapManagerInstantCapture : public TrapManagerBase {
 
     bool any_non_uniform_traps;
 
-    double n_electrons_released();
+    double n_electrons_released(int trap_number = -1);
     void update_watermarks_capture(
         double cloud_fractional_volume, int i_wmk_above_cloud);
     void update_watermarks_capture_not_enough(
         double cloud_fractional_volume, int i_wmk_above_cloud, double enough);
-    double n_electrons_captured(double n_free_electrons);
-    double n_electrons_released_and_captured(double n_free_electrons);
-    double n_electrons_released_from_wmk_above_cloud(int i_wmk);
+    double n_electrons_captured(double n_free_electrons, int trap_number = -1);
+    double n_electrons_released_and_captured(double n_free_electrons, int trap_number = -1);
+    double n_electrons_released_from_wmk_above_cloud(int i_wmk, int trap_number = -1);
 };
 
 class TrapManagerSlowCapture : public TrapManagerBase {
@@ -94,8 +98,8 @@ class TrapManagerSlowCapture : public TrapManagerBase {
     void set_fill_probabilities();
     void setup();
 
-    double n_electrons_released_and_captured(double n_free_electrons);
-    double n_electrons_released_from_wmk_above_cloud(int i_wmk);
+    double n_electrons_released_and_captured(double n_free_electrons, int trap_number = -1);
+    double n_electrons_released_from_wmk_above_cloud(int i_wmk, int trap_number = -1);
 };
 
 class TrapManagerInstantCaptureContinuum : public TrapManagerBase {
@@ -115,14 +119,14 @@ class TrapManagerInstantCaptureContinuum : public TrapManagerBase {
     void prepare_interpolation_tables();
     void setup();
 
-    double n_electrons_released();
+    double n_electrons_released(int trap_number = -1);
     void update_watermarks_capture(
         double cloud_fractional_volume, int i_wmk_above_cloud);
     void update_watermarks_capture_not_enough(
         double cloud_fractional_volume, int i_wmk_above_cloud, double enough);
-    double n_electrons_captured(double n_free_electrons);
-    double n_electrons_released_and_captured(double n_free_electrons);
-    double n_electrons_released_from_wmk_above_cloud(int i_wmk);
+    double n_electrons_captured(double n_free_electrons, int trap_number = -1);
+    double n_electrons_released_and_captured(double n_free_electrons, int trap_number = -1);
+    double n_electrons_released_from_wmk_above_cloud(int i_wmk, int trap_number = -1);
 };
 
 class TrapManagerSlowCaptureContinuum : public TrapManagerBase {
@@ -142,8 +146,8 @@ class TrapManagerSlowCaptureContinuum : public TrapManagerBase {
     void prepare_interpolation_tables();
     void setup();
 
-    double n_electrons_released_and_captured(double n_free_electrons);
-    double n_electrons_released_from_wmk_above_cloud(int i_wmk);
+    double n_electrons_released_and_captured(double n_free_electrons, int trap_number = -1);
+    double n_electrons_released_from_wmk_above_cloud(int i_wmk, int trap_number = -1);
 };
 
 class TrapManagerManager {

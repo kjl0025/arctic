@@ -32,6 +32,7 @@ void add_cti(
     // Traps
     double* parallel_trap_densities, double* parallel_trap_release_timescales,
     double* parallel_trap_third_params, double* parallel_trap_fourth_params,
+    double* parallel_trap_rows, double* parallel_trap_cols,
     int parallel_n_traps_ic, int parallel_n_traps_sc, int parallel_n_traps_ic_co,
     int parallel_n_traps_sc_co,
     // Misc
@@ -58,6 +59,7 @@ void add_cti(
     // Traps
     double* serial_trap_densities, double* serial_trap_release_timescales,
     double* serial_trap_third_params, double* serial_trap_fourth_params,
+    double* serial_trap_rows, double* serial_trap_cols,
     int serial_n_traps_ic, int serial_n_traps_sc, int serial_n_traps_ic_co,
     int serial_n_traps_sc_co,
     // Misc

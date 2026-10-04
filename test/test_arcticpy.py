@@ -985,11 +985,11 @@ def run_map():
     )
     trap_density_map = np.array(
         [
-            [0.0, 0.0, 0.0, 0.0],
+            [1.0, 0.0, 0.0, 0.0],
             [0.0, 0.0, 0.0, 0.0],
             [1.0, 0.0, 0.0, 0.0],
             [0.0, 0.0, 0.0, 0.0],
-            [0.0, 0.0, 0.0, 0.0],
+            [1.0, 0.0, 0.0, 0.0],
             [0.0, 0.0, 0.0, 0.0],
         ]
     )
@@ -998,7 +998,7 @@ def run_map():
         dwell_times=[1.0],
         empty_traps_between_columns=True,
         empty_traps_for_first_transfers=False,
-        force_release_away_from_readout=True,
+        force_release_away_from_readout=True, #False,#True,
         use_integer_express_matrix=False,
     )
     ccd = cti.CCD(
@@ -1007,7 +1007,10 @@ def run_map():
         ],
         fraction_of_traps_per_phase=[1.0],
     )
-    traps = [cti.TrapInstantCapture(density=10.0, release_timescale=-1.0 / np.log(0.5))]
+    traps = [cti.TrapInstantCapture(density=10, release_timescale=-1.0 / np.log(0.5), trap_row=5, trap_col=0),
+             cti.TrapInstantCapture(density=10, release_timescale=-1.0 / np.log(0.3), trap_row=1, trap_col=1),
+            #cti.TrapSlowCaptureContinuum(density=10.0, release_timescale=-1.0 / np.log(0.2), release_timescale_sigma=0.01, capture_timescale=1e-1)
+    ]       
     express = 0
     offset = 0
     start = 0
@@ -1034,7 +1037,7 @@ def run_map():
         # serial_window_start=start,
         # serial_window_stop=stop,
         verbosity=1,
-        trap_density_map=trap_density_map
+        #trap_density_map=trap_density_map
     )
 
     print("\n# Image with CTI added:")
@@ -1059,7 +1062,7 @@ def run_map():
         # serial_window_start=start,
         # serial_window_stop=stop,
         verbosity=1,
-        trap_density_map=trap_density_map
+        #trap_density_map=trap_density_map
     )
 
     print("\n# Image with CTI removed:")

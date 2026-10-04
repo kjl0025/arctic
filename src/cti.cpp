@@ -329,7 +329,7 @@ std::valarray<std::valarray<double> > clock_charge_in_one_direction(
             print_v(2, "# # #  express_index  %d \n", express_index);
 
             // Restore the trap occupancy levels, either to empty or to a saved
-            // state from a previous express pass
+            // state from a previous express pass 
             trap_manager_manager.restore_trap_states();
 
             // Each pixel
@@ -357,14 +357,13 @@ std::valarray<std::valarray<double> > clock_charge_in_one_direction(
                 }
 
                 // If this pixel has 0 traps, skip processing trap dynamics for this pixel
-                //if (trap_density_scale <= 0.0) continue;
+                // if (trap_density_scale <= 0.0) continue;
 
                 // Each step in the clock sequence
                 for (unsigned int i_step = 0; i_step < roe->n_steps; i_step++) {
 
                     // Each phase in the pixel
                     for (unsigned int i_phase = 0; i_phase < ccd->n_phases; i_phase++) {
-
                         if ((roe->n_steps > 1) || (ccd->n_phases > 1))
                             print_v(
                                 2, "#  i_step, i_phase  %d,  %d \n", i_step, i_phase);
@@ -380,37 +379,114 @@ std::valarray<std::valarray<double> > clock_charge_in_one_direction(
 
                             n_free_electrons += image[row_read][column_index];
                         }
-
+                        
                         print_v(2, "row_read  %d \n", row_read);
                         print_v(2, "n_free_electrons  %g \n", n_free_electrons);
  
                         // Release and capture electrons with the traps in this
                         // pixel/phase, for each type of traps
                         n_electrons_released_and_captured = 0;
-                        if (trap_manager_manager.n_traps_ic > 0)
-                            n_electrons_released_and_captured +=
-                                trap_manager_manager.trap_managers_ic[i_phase]
-                                    .n_electrons_released_and_captured(
-                                        n_free_electrons +
-                                        n_electrons_released_and_captured);
-                        if (trap_manager_manager.n_traps_sc > 0)
-                            n_electrons_released_and_captured +=
-                                trap_manager_manager.trap_managers_sc[i_phase]
-                                    .n_electrons_released_and_captured(
-                                        n_free_electrons +
-                                        n_electrons_released_and_captured);
-                        if (trap_manager_manager.n_traps_ic_co > 0)
-                            n_electrons_released_and_captured +=
-                                trap_manager_manager.trap_managers_ic_co[i_phase]
-                                    .n_electrons_released_and_captured(
-                                        n_free_electrons +
-                                        n_electrons_released_and_captured);
-                        if (trap_manager_manager.n_traps_sc_co > 0)
-                            n_electrons_released_and_captured +=
-                                trap_manager_manager.trap_managers_sc_co[i_phase]
-                                    .n_electrons_released_and_captured(
-                                        n_free_electrons +
-                                        n_electrons_released_and_captured);
+                        if (trap_manager_manager.n_traps_ic > 0) {
+                            // Only loop over traps with specific locations if both are set
+                            bool use_trap_loops = (trap_manager_manager.trap_managers_ic[i_phase].traps[0].trap_row != nullptr) &&
+                                                  (trap_manager_manager.trap_managers_ic[i_phase].traps[0].trap_col != nullptr);
+                            if (use_trap_loops) {
+                                for (int i_trap = 0; i_trap < trap_manager_manager.n_traps_ic; i_trap++) {
+                                    bool valid_row = ((i_row > *trap_manager_manager.trap_managers_ic[i_phase].traps[i_trap].trap_row && 
+                                                      roe->force_release_away_from_readout) || 
+                                                      (i_row < *trap_manager_manager.trap_managers_ic[i_phase].traps[i_trap].trap_row && 
+                                                       not roe->force_release_away_from_readout));
+                                    print_v(2, "i_row  %d \n", i_row);
+                                    print_v(2, "i_column  %d \n", i_column);
+                                    print_v(2, "trap_row  %d \n", *trap_manager_manager.trap_managers_ic[i_phase].traps[i_trap].trap_row);
+                                    print_v(2, "trap_col  %d \n", *trap_manager_manager.trap_managers_ic[i_phase].traps[i_trap].trap_col);
+                                    print_v(2, "valid_row  %d \n", valid_row);
+                                    if (i_column == *trap_manager_manager.trap_managers_ic[i_phase].traps[i_trap].trap_col &&
+                                        valid_row)
+                                        n_electrons_released_and_captured +=
+                                            trap_manager_manager.trap_managers_ic[i_phase]
+                                                .n_electrons_released_and_captured(
+                                                    n_free_electrons + n_electrons_released_and_captured, i_trap);
+                                }
+                            } else {
+                                n_electrons_released_and_captured +=
+                                    trap_manager_manager.trap_managers_ic[i_phase]
+                                        .n_electrons_released_and_captured(
+                                            n_free_electrons + n_electrons_released_and_captured);
+                            }
+                        }
+                        if (trap_manager_manager.n_traps_sc > 0) {
+                            // Only loop over traps with specific locations if both are set
+                            bool use_trap_loops = (trap_manager_manager.trap_managers_sc[i_phase].traps[0].trap_row != nullptr) &&
+                                                  (trap_manager_manager.trap_managers_sc[i_phase].traps[0].trap_col != nullptr);
+                            if (use_trap_loops) {
+                                for (int i_trap = 0; i_trap < trap_manager_manager.n_traps_sc; i_trap++) {
+                                    bool valid_row = ((i_row > *trap_manager_manager.trap_managers_sc[i_phase].traps[i_trap].trap_row && 
+                                                      roe->force_release_away_from_readout) || 
+                                                      (i_row < *trap_manager_manager.trap_managers_sc[i_phase].traps[i_trap].trap_row && 
+                                                       not roe->force_release_away_from_readout));
+                                    if (i_column == *trap_manager_manager.trap_managers_sc[i_phase].traps[i_trap].trap_col &&
+                                        valid_row)
+                                        n_electrons_released_and_captured +=
+                                            trap_manager_manager.trap_managers_sc[i_phase]
+                                                .n_electrons_released_and_captured(
+                                                    n_free_electrons + n_electrons_released_and_captured, i_trap);
+                                }
+                            } else {
+                                n_electrons_released_and_captured +=
+                                    trap_manager_manager.trap_managers_sc[i_phase]
+                                        .n_electrons_released_and_captured(
+                                            n_free_electrons + n_electrons_released_and_captured);
+                            }
+                        }
+                        if (trap_manager_manager.n_traps_ic_co > 0) {
+                            // Only loop over traps with specific locations if both are set
+                            bool use_trap_loops = (trap_manager_manager.trap_managers_ic_co[i_phase].traps[0].trap_row != nullptr) &&
+                                                  (trap_manager_manager.trap_managers_ic_co[i_phase].traps[0].trap_col != nullptr);
+                            if (use_trap_loops) {
+                                for (int i_trap = 0; i_trap < trap_manager_manager.n_traps_ic_co; i_trap++) {
+                                    bool valid_row = ((i_row > *trap_manager_manager.trap_managers_ic_co[i_phase].traps[i_trap].trap_row && 
+                                                      roe->force_release_away_from_readout) || 
+                                                      (i_row < *trap_manager_manager.trap_managers_ic_co[i_phase].traps[i_trap].trap_row && 
+                                                       not roe->force_release_away_from_readout));
+                                    if (i_column == *trap_manager_manager.trap_managers_ic_co[i_phase].traps[i_trap].trap_col &&
+                                        valid_row)
+                                        n_electrons_released_and_captured +=
+                                            trap_manager_manager.trap_managers_ic_co[i_phase]
+                                                .n_electrons_released_and_captured(
+                                                    n_free_electrons + n_electrons_released_and_captured, i_trap);
+                                }
+                            } else {
+                                n_electrons_released_and_captured +=
+                                    trap_manager_manager.trap_managers_ic_co[i_phase]
+                                        .n_electrons_released_and_captured(
+                                            n_free_electrons + n_electrons_released_and_captured);
+                            }
+                        }
+                        if (trap_manager_manager.n_traps_sc_co > 0) {
+                            // Only loop over traps with specific locations if both are set
+                            bool use_trap_loops = (trap_manager_manager.trap_managers_sc_co[i_phase].traps[0].trap_row != nullptr) &&
+                                                  (trap_manager_manager.trap_managers_sc_co[i_phase].traps[0].trap_col != nullptr);
+                            if (use_trap_loops) {
+                                for (int i_trap = 0; i_trap < trap_manager_manager.n_traps_sc_co; i_trap++) {
+                                    bool valid_row = ((i_row > *trap_manager_manager.trap_managers_sc_co[i_phase].traps[i_trap].trap_row && 
+                                                      roe->force_release_away_from_readout) || 
+                                                      (i_row < *trap_manager_manager.trap_managers_sc_co[i_phase].traps[i_trap].trap_row && 
+                                                       not roe->force_release_away_from_readout));
+                                    if (i_column == *trap_manager_manager.trap_managers_sc_co[i_phase].traps[i_trap].trap_col &&
+                                        valid_row)
+                                        n_electrons_released_and_captured +=
+                                            trap_manager_manager.trap_managers_sc_co[i_phase]
+                                                .n_electrons_released_and_captured(
+                                                    n_free_electrons + n_electrons_released_and_captured, i_trap);
+                                }
+                            } else {
+                                n_electrons_released_and_captured +=
+                                    trap_manager_manager.trap_managers_sc_co[i_phase]
+                                        .n_electrons_released_and_captured(
+                                            n_free_electrons + n_electrons_released_and_captured);
+                            }
+                        }
                       
                         print_v(
                             2, "n_electrons_released_and_captured  %g \n",
@@ -425,7 +501,7 @@ std::valarray<std::valarray<double> > clock_charge_in_one_direction(
                         // =========================================================================
                         // MODIFICATION: Apply local trap density scaling factor XXX
                         // =========================================================================
-                        n_electrons_released_and_captured *= trap_density_scale;
+                        // n_electrons_released_and_captured *= trap_density_scale; XXX
 
                         // Return the charge to the relevant pixel(s)
                         for (int i = 0; i < roe_step_phase->n_release_pixels; i++) {

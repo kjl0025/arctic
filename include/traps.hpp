@@ -11,10 +11,13 @@ class TrapInstantCapture {
     TrapInstantCapture(
         double density, double release_timescale,
         double fractional_volume_none_exposed = 0.0,
-        double fractional_volume_full_exposed = 0.0);
+        double fractional_volume_full_exposed = 0.0, int* trap_row = nullptr,
+        int* trap_col = nullptr);
     ~TrapInstantCapture(){};
 
     double density;
+    int* trap_row;
+    int* trap_col;
 
     double release_timescale;
     double release_rate;
@@ -30,7 +33,9 @@ class TrapInstantCapture {
 
 class TrapSlowCapture : public TrapInstantCapture {
    public:
-    TrapSlowCapture(double density, double release_timescale, double capture_timescale);
+    TrapSlowCapture(
+        double density, double release_timescale, double capture_timescale,
+        int* trap_row = nullptr, int* trap_col = nullptr);
     ~TrapSlowCapture(){};
 
     double capture_timescale;
@@ -40,7 +45,8 @@ class TrapSlowCapture : public TrapInstantCapture {
 class TrapInstantCaptureContinuum : public TrapInstantCapture {
    public:
     TrapInstantCaptureContinuum(
-        double density, double release_timescale, double release_timescale_sigma);
+        double density, double release_timescale, double release_timescale_sigma,
+        int* trap_row = nullptr, int* trap_col = nullptr);
     ~TrapInstantCaptureContinuum(){};
 
     double release_timescale_sigma;
@@ -69,7 +75,7 @@ class TrapSlowCaptureContinuum : public TrapInstantCapture {
    public:
     TrapSlowCaptureContinuum(
         double density, double release_timescale, double release_timescale_sigma,
-        double capture_timescale);
+        double capture_timescale, int* trap_row = nullptr, int* trap_col = nullptr);
     ~TrapSlowCaptureContinuum(){};
 
     double release_timescale_sigma;

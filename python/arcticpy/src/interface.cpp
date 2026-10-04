@@ -4,7 +4,14 @@
 #include <stdio.h>
 
 #include <valarray>
+#include <vector>
 
+// Pointer to the stored row/col of trap i, or nullptr if unset (negative)
+static int* trap_location_ptr(double* locations, std::vector<int>& values, int i) {
+    if (locations[i] < 0.0) return nullptr;
+    values[i] = (int)locations[i];
+    return &values[i];
+}
 /*
     Wrapper for arctic print_array()
 */
@@ -65,6 +72,7 @@ void add_cti(
     // Traps
     double* parallel_trap_densities, double* parallel_trap_release_timescales,
     double* parallel_trap_third_params, double* parallel_trap_fourth_params,
+    double* parallel_trap_rows, double* parallel_trap_cols,
     int parallel_n_traps_ic, int parallel_n_traps_sc, int parallel_n_traps_ic_co,
     int parallel_n_traps_sc_co,
     // Misc
@@ -93,6 +101,7 @@ void add_cti(
     // Traps
     double* serial_trap_densities, double* serial_trap_release_timescales,
     double* serial_trap_third_params, double* serial_trap_fourth_params,
+    double* serial_trap_rows, double* serial_trap_cols,
     int serial_n_traps_ic, int serial_n_traps_sc, int serial_n_traps_ic_co,
     int serial_n_traps_sc_co,
     // Misc
@@ -195,32 +204,44 @@ void add_cti(
         TrapSlowCaptureContinuum(0.0, 0.0, 0.0, 0.0), parallel_n_traps_sc_co);
 
     int n_traps_parallel = 0;
+    std::vector<int> parallel_trap_row_vals(
+        parallel_n_traps_ic + parallel_n_traps_sc + parallel_n_traps_ic_co +
+        parallel_n_traps_sc_co);
+    std::vector<int> parallel_trap_col_vals(parallel_trap_row_vals.size());
     for (int i_trap = n_traps_parallel; i_trap < n_traps_parallel + parallel_n_traps_ic;
          i_trap++) {
         parallel_traps_ic[i_trap] = TrapInstantCapture(
             parallel_trap_densities[i_trap], parallel_trap_release_timescales[i_trap],
-            parallel_trap_third_params[i_trap], parallel_trap_fourth_params[i_trap]);
+            parallel_trap_third_params[i_trap], parallel_trap_fourth_params[i_trap],
+            trap_location_ptr(parallel_trap_rows, parallel_trap_row_vals, i_trap),
+            trap_location_ptr(parallel_trap_cols, parallel_trap_col_vals, i_trap));
     }
     n_traps_parallel += parallel_n_traps_ic;
     for (int i_trap = n_traps_parallel; i_trap < n_traps_parallel + parallel_n_traps_sc;
          i_trap++) {
         parallel_traps_sc[i_trap - n_traps_parallel] = TrapSlowCapture(
             parallel_trap_densities[i_trap], parallel_trap_release_timescales[i_trap],
-            parallel_trap_third_params[i_trap]);
+            parallel_trap_third_params[i_trap],
+            trap_location_ptr(parallel_trap_rows, parallel_trap_row_vals, i_trap),
+            trap_location_ptr(parallel_trap_cols, parallel_trap_col_vals, i_trap));
     }
     n_traps_parallel += parallel_n_traps_sc;
     for (int i_trap = n_traps_parallel;
          i_trap < n_traps_parallel + parallel_n_traps_ic_co; i_trap++) {
         parallel_traps_continuum[i_trap - n_traps_parallel] = TrapInstantCaptureContinuum(
             parallel_trap_densities[i_trap], parallel_trap_release_timescales[i_trap],
-            parallel_trap_third_params[i_trap]);
+            parallel_trap_third_params[i_trap],
+            trap_location_ptr(parallel_trap_rows, parallel_trap_row_vals, i_trap),
+            trap_location_ptr(parallel_trap_cols, parallel_trap_col_vals, i_trap));
     }
     n_traps_parallel += parallel_n_traps_ic_co;
     for (int i_trap = n_traps_parallel;
          i_trap < n_traps_parallel + parallel_n_traps_sc_co; i_trap++) {
         parallel_traps_sc_co[i_trap - n_traps_parallel] = TrapSlowCaptureContinuum(
             parallel_trap_densities[i_trap], parallel_trap_release_timescales[i_trap],
-            parallel_trap_third_params[i_trap], parallel_trap_fourth_params[i_trap]);
+            parallel_trap_third_params[i_trap], parallel_trap_fourth_params[i_trap],
+            trap_location_ptr(parallel_trap_rows, parallel_trap_row_vals, i_trap),
+            trap_location_ptr(parallel_trap_cols, parallel_trap_col_vals, i_trap));
     }
     n_traps_parallel += parallel_n_traps_sc_co;
 
@@ -282,32 +303,44 @@ void add_cti(
         TrapSlowCaptureContinuum(0.0, 0.0, 0.0, 0.0), serial_n_traps_sc_co);
 
     int n_traps_serial = 0;
+    std::vector<int> serial_trap_row_vals(
+        serial_n_traps_ic + serial_n_traps_sc + serial_n_traps_ic_co +
+        serial_n_traps_sc_co);
+    std::vector<int> serial_trap_col_vals(serial_trap_row_vals.size());
     for (int i_trap = n_traps_serial; i_trap < n_traps_serial + serial_n_traps_ic;
          i_trap++) {
         serial_traps_ic[i_trap] = TrapInstantCapture(
             serial_trap_densities[i_trap], serial_trap_release_timescales[i_trap],
-            serial_trap_third_params[i_trap], serial_trap_fourth_params[i_trap]);
+            serial_trap_third_params[i_trap], serial_trap_fourth_params[i_trap],
+            trap_location_ptr(serial_trap_rows, serial_trap_row_vals, i_trap),
+            trap_location_ptr(serial_trap_cols, serial_trap_col_vals, i_trap));
     }
     n_traps_serial += serial_n_traps_ic;
     for (int i_trap = n_traps_serial; i_trap < n_traps_serial + serial_n_traps_sc;
          i_trap++) {
         serial_traps_sc[i_trap - n_traps_serial] = TrapSlowCapture(
             serial_trap_densities[i_trap], serial_trap_release_timescales[i_trap],
-            serial_trap_third_params[i_trap]);
+            serial_trap_third_params[i_trap],
+            trap_location_ptr(serial_trap_rows, serial_trap_row_vals, i_trap),
+            trap_location_ptr(serial_trap_cols, serial_trap_col_vals, i_trap));
     }
     n_traps_serial += serial_n_traps_sc;
     for (int i_trap = n_traps_serial; i_trap < n_traps_serial + serial_n_traps_ic_co;
          i_trap++) {
         serial_traps_continuum[i_trap - n_traps_serial] = TrapInstantCaptureContinuum(
             serial_trap_densities[i_trap], serial_trap_release_timescales[i_trap],
-            serial_trap_third_params[i_trap]);
+            serial_trap_third_params[i_trap],
+            trap_location_ptr(serial_trap_rows, serial_trap_row_vals, i_trap),
+            trap_location_ptr(serial_trap_cols, serial_trap_col_vals, i_trap));
     }
     n_traps_serial += serial_n_traps_ic_co;
     for (int i_trap = n_traps_serial; i_trap < n_traps_serial + serial_n_traps_sc_co;
          i_trap++) {
         serial_traps_sc_co[i_trap - n_traps_serial] = TrapSlowCaptureContinuum(
             serial_trap_densities[i_trap], serial_trap_release_timescales[i_trap],
-            serial_trap_third_params[i_trap], serial_trap_fourth_params[i_trap]);
+            serial_trap_third_params[i_trap], serial_trap_fourth_params[i_trap],
+            trap_location_ptr(serial_trap_rows, serial_trap_row_vals, i_trap),
+            trap_location_ptr(serial_trap_cols, serial_trap_col_vals, i_trap));
     }
     n_traps_serial += serial_n_traps_sc_co;
 

@@ -51,8 +51,10 @@
 */
 TrapInstantCapture::TrapInstantCapture(
     double density, double release_timescale, double fractional_volume_none_exposed,
-    double fractional_volume_full_exposed)
+    double fractional_volume_full_exposed, int* trap_row, int* trap_col)
     : density(density),
+      trap_row(trap_row),
+      trap_col(trap_col),
       release_timescale(release_timescale),
       fractional_volume_none_exposed(fractional_volume_none_exposed),
       fractional_volume_full_exposed(fractional_volume_full_exposed) {
@@ -168,8 +170,9 @@ double TrapInstantCapture::fraction_traps_exposed_per_fractional_volume(
         The release and capture rates (Lindegren (1998) section 3.2).
 */
 TrapSlowCapture::TrapSlowCapture(
-    double density, double release_timescale, double capture_timescale)
-    : TrapInstantCapture(density, release_timescale),
+    double density, double release_timescale, double capture_timescale, int* trap_row,
+    int* trap_col)
+    : TrapInstantCapture(density, release_timescale, 0.0, 0.0, trap_row, trap_col),
       capture_timescale(capture_timescale) {
 
     if (capture_timescale != 0.0)
@@ -203,8 +206,9 @@ TrapSlowCapture::TrapSlowCapture(
         The sigma of release lifetimes of the traps.
 */
 TrapInstantCaptureContinuum::TrapInstantCaptureContinuum(
-    double density, double release_timescale, double release_timescale_sigma)
-    : TrapInstantCapture(density, release_timescale),
+    double density, double release_timescale, double release_timescale_sigma,
+    int* trap_row, int* trap_col)
+    : TrapInstantCapture(density, release_timescale, 0.0, 0.0, trap_row, trap_col),
       release_timescale_sigma(release_timescale_sigma) {}
 
 /*
@@ -552,8 +556,8 @@ double TrapInstantCaptureContinuum::time_elapsed_from_fill_fraction_table(
 */
 TrapSlowCaptureContinuum::TrapSlowCaptureContinuum(
     double density, double release_timescale, double release_timescale_sigma,
-    double capture_timescale)
-    : TrapInstantCapture(density, release_timescale),
+    double capture_timescale, int* trap_row, int* trap_col)
+    : TrapInstantCapture(density, release_timescale, 0.0, 0.0, trap_row, trap_col),
       release_timescale_sigma(release_timescale_sigma),
       capture_timescale(capture_timescale) {
 

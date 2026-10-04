@@ -143,6 +143,8 @@ def add_cti(
             parallel_trap_release_timescales,
             parallel_trap_third_params,
             parallel_trap_fourth_params,
+            parallel_trap_rows,
+            parallel_trap_cols,
             parallel_n_traps_ic,
             parallel_n_traps_sc,
             parallel_n_traps_ic_co,
@@ -157,6 +159,8 @@ def add_cti(
             parallel_trap_release_timescales,
             parallel_trap_third_params,
             parallel_trap_fourth_params,
+            parallel_trap_rows,
+            parallel_trap_cols,
             parallel_n_traps_ic,
             parallel_n_traps_sc,
             parallel_n_traps_ic_co,
@@ -171,6 +175,8 @@ def add_cti(
             serial_trap_release_timescales,
             serial_trap_third_params,
             serial_trap_fourth_params,
+            serial_trap_rows,
+            serial_trap_cols,
             serial_n_traps_ic,
             serial_n_traps_sc,
             serial_n_traps_ic_co,
@@ -185,6 +191,8 @@ def add_cti(
             serial_trap_release_timescales,
             serial_trap_third_params,
             serial_trap_fourth_params,
+            serial_trap_rows,
+            serial_trap_cols,
             serial_n_traps_ic,
             serial_n_traps_sc,
             serial_n_traps_ic_co,
@@ -242,6 +250,8 @@ def add_cti(
         parallel_trap_release_timescales,
         parallel_trap_third_params,
         parallel_trap_fourth_params,
+        parallel_trap_rows,
+        parallel_trap_cols,
         parallel_n_traps_ic,
         parallel_n_traps_sc,
         parallel_n_traps_ic_co,
@@ -279,6 +289,8 @@ def add_cti(
         serial_trap_release_timescales,
         serial_trap_third_params,
         serial_trap_fourth_params,
+        serial_trap_rows,
+        serial_trap_cols,
         serial_n_traps_ic,
         serial_n_traps_sc,
         serial_n_traps_ic_co,
@@ -716,12 +728,23 @@ def _extract_trap_parameters(traps):
         elif type(trap) == TrapSlowCaptureContinuum:
             trap_fourth_params.append(trap.capture_timescale)
     trap_fourth_params = np.array(trap_fourth_params, dtype=np.double)
+    # Optional trap location, passed as -1 when unset (None)
+    trap_rows = np.array(
+        [-1.0 if trap.trap_row is None else trap.trap_row for trap in traps],
+        dtype=np.double,
+    )
+    trap_cols = np.array(
+        [-1.0 if trap.trap_col is None else trap.trap_col for trap in traps],
+        dtype=np.double,
+    )
 
     return (
         trap_densities,
         trap_release_timescales,
         trap_third_params,
         trap_fourth_params,
+        trap_rows,
+        trap_cols,
         n_traps_ic,
         n_traps_sc,
         n_traps_ic_co,
@@ -742,6 +765,8 @@ def _set_dummy_parameters():
     trap_release_timescales = np.array([0.0], dtype=np.double)
     trap_third_params = np.array([0.0], dtype=np.double)
     trap_fourth_params = np.array([0.0], dtype=np.double)
+    trap_rows = np.array([-1.0], dtype=np.double)
+    trap_cols = np.array([-1.0], dtype=np.double)
     n_traps_ic = 0
     n_traps_sc = 0
     n_traps_ic_co = 0
@@ -754,6 +779,8 @@ def _set_dummy_parameters():
         trap_release_timescales,
         trap_third_params,
         trap_fourth_params,
+        trap_rows,
+        trap_cols,
         n_traps_ic,
         n_traps_sc,
         n_traps_ic_co,
